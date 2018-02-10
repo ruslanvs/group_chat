@@ -1,0 +1,33 @@
+1. Set up routing for index and chat pages to show up
+
+2. Have index prompt for name
+
+3. Upon user submitting their name:
+    
+    save user name into session;
+
+    render chat page with the ongoing conversation to the user
+    
+    emit "user_joined" event to the server
+    
+4. When a user sends a message:
+    emit "message" event to the server along with message content
+    
+    the server, upon the "message" event:
+        looks up the user name in the session
+        puts the user name and the message into the messages array
+        BROADCASTS "new_message" event with an updated messages array
+    
+    upon the "user_joined" event:
+        looks up the user name in the session
+        puts a special "user joined" message into the messages array
+        BROADCASTS "new_message" event with an updated messages array
+
+
+5. messages:
+    stored in an array
+    each message is an object with:
+        user name
+        message content
+
+6. upon "new_message" event all clients update the chat html with content from messages array 

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Group Chat</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+        $( document ).ready( function(){
+            var socket = io.connect();
+            var name = prompt( "What is your name?");
+
+            if( name ){
+                socket.emit( "user_joined", name )
+                document.getElementById( "message_label" ).innerHTML = name + ":";
+                
+            }
+            $( "form" ).submit( function(e){
+                socket.emit( "message", {
+                    name: name,
+                    message: $( "#message" ).val()
+                } ),
+                e.preventDefault();
+            })
+
+            socket.on( "new_message", function( data, users ){
+                document.getElementById( "user_list" ).innerHTML = "";
+                document.getElementById( "chat_stream" ).innerHTML = "";
+                // console.log( "USERS: ", users )
+                for ( let i in users ){
+                    let line = document.createElement( "a" );
+                    let line_text = document.createTextNode( users[i].name + ", " );
+                    line.appendChild( line_text );
+                    document.getElementById( "user_list" ).appendChild( line );
+                }
+                
+                if( data.length < 20 )
+                    length = data.length;
+                else
+                    length = 20;
+                for ( let i = data.length-length; i < data.length; i++ ){
+                    let line = document.createElement( "p" );
+                    let line_text = document.createTextNode( data[i].name + ": " + data[i].message );
+                    line.appendChild( line_text );
+                    document.getElementById( "chat_stream" ).appendChild( line );
+                }
+            } )
+        })
+    </script>
+    <style>
+        body {
+            background-color: yellow;
+            margin: 1%;
+            padding: 1%;
+            height: 100vh;
+            }
+        #chat_stream{
+            background-color: green;
+            height: 70%;
+            overflow-y: scroll;
+        }
+        p{
+            margin: 0px;
+        }
+
+    </style>
+
+</head>
+<body>
+    <h1>Conversation board</h1>
+    <div id="user_list"></div>
+    <div id="chat_stream"></div>
+    <form>
+        <label for="message" id="message_label"></label>
+        <input id="message" type="text">
+        <input type="submit" value="Send">
+    </form>
+    
+</body>
+</html>
