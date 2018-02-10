@@ -13,8 +13,8 @@
             if( name ){
                 socket.emit( "user_joined", name )
                 document.getElementById( "message_label" ).innerHTML = name + ":";
-                
             }
+
             $( "form" ).submit( function(e){
                 socket.emit( "message", {
                     name: name,
@@ -23,13 +23,12 @@
                 e.preventDefault();
             })
 
-            socket.on( "new_message", function( data, users ){
+            socket.on( "new_message", function( data, users_dict ){
                 document.getElementById( "user_list" ).innerHTML = "";
                 document.getElementById( "chat_stream" ).innerHTML = "";
-                // console.log( "USERS: ", users )
-                for ( let i in users ){
+                for ( let i in users_dict ){
                     let line = document.createElement( "a" );
-                    let line_text = document.createTextNode( users[i].name + ", " );
+                    let line_text = document.createTextNode( users_dict[i] + ", " );
                     line.appendChild( line_text );
                     document.getElementById( "user_list" ).appendChild( line );
                 }

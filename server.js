@@ -27,22 +27,32 @@ var server = app.listen( 8000, function() {
 var io = require( "socket.io" ).listen( server );
 
 var chat = [];
-var users = [];
+var users_dict = {};
 
 io.sockets.on( "connection", function( socket ){
-    console.log( "Client/socket is connected")
+    console.log( "Client/socket is connected");
     console.log( "Client/socket id is: ", socket.id );
+    users_dict[socket.id] = "user";
 
     socket.on( "user_joined", function( data ){
-        chat.push( {name: data, message: "joined"})
-        users.push( {name: data} )
-        io.emit( "new_message", chat, users )
+        chat.push( {name: data, message: "*** joined ***"})
+        users_dict[socket.id] = data;
+        io.emit( "new_message", chat, users_dict )
+        console.log( "USERS: ", users_dict );
     })
 
     socket.on( "message", function( data ){
-        console.log( "PACKAGE CONTAINS: ", data );
         chat.push( {name: data.name, message: data.message} )
         console.log( "CHAT ARRAY: ", chat);
-        io.emit( "new_message", chat, users )
+        io.emit( "new_message", chat, users_dict )
     })
+
+    socket.on( "disconnect", function(){
+        console.log( socket.id + " HAS DISCONNECTED" );
+        chat.push( {name: users_dict[socket.id], message: "*** user has disconnected ***"} )
+        delete users_dict[socket.id];
+        console.log( "USERS: ", users_dict );
+        io.emit( "new_message", chat, users_dict )
+    })
+
 })
